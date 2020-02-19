@@ -1,6 +1,7 @@
 package com.viessmann.vaadin15.typescript.rest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,5 +23,11 @@ public class SubscriptionController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public void subscribe(@RequestBody Subscription subscription) {
 		this.subService.addSubscription(subscription);
+	}
+	
+	@DeleteMapping("/unregister")
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	public void unregister() {
+		System.out.println("unregister service worker, so all subscriptions?");
 	}
 }

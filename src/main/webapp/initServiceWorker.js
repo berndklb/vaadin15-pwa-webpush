@@ -6,12 +6,11 @@ if ('serviceWorker' in navigator) {
 }
 
 async function init() {
-	await navigator.serviceWorker.register("/sw.js", {
+	navigator.serviceWorker.register("/sw.js", {
 	    scope: "/"
 	  }).then(function(registration) {
-		console.log("registration: " + registration);
-		this.swRegistration = registration;
 	  });
+	
 	
 	fetch('/publicSigningKey')
     .then(response => response.arrayBuffer())

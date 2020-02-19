@@ -10,7 +10,18 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +29,9 @@ import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.viessmann.vaadin15.typescript.Application;
 import com.viessmann.vaadin15.typescript.dto.Subscription;
 import com.viessmann.vaadin15.typescript.keys.CryptoService;
 import com.viessmann.vaadin15.typescript.keys.ServerKeys;
@@ -113,4 +126,30 @@ public class PushService {
 
 	    return false;
 	  }
+	
+	  public void sendPushMessageToAllSubscribers(List<Subscription> subs,
+		      Object message) throws JsonProcessingException {
+
+		    Set<String> failedSubscriptions = new HashSet<>();
+
+		    for (Subscription subscription : subs) {
+		      try {
+		        byte[] result = this.cryptoService.encrypt(
+		            this.objectMapper.writeValueAsString(message),
+		            subscription.getKeys().getP256dh(), subscription.getKeys().getAuth(), 0);
+		        boolean remove = sendPushMessage(subscription, result);
+		        if (remove) {
+		          failedSubscriptions.add(subscription.getEndpoint());
+		        }
+		      }
+		      catch (InvalidKeyException | NoSuchAlgorithmException
+		          | InvalidAlgorithmParameterException | IllegalStateException
+		          | InvalidKeySpecException | NoSuchPaddingException | IllegalBlockSizeException
+		          | BadPaddingException e) {
+		        logger.error("send encrypted message", e);
+		      }
+		    }
+
+		    failedSubscriptions.forEach(subs::remove);
+		  }
 }
