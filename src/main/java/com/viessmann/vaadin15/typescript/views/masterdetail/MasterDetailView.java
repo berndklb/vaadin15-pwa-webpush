@@ -2,8 +2,6 @@ package com.viessmann.vaadin15.typescript.views.masterdetail;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.viessmann.vaadin15.typescript.backend.BackendService;
-import com.viessmann.vaadin15.typescript.backend.Employee;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,6 +20,10 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.viessmann.vaadin15.typescript.backend.BackendService;
+import com.viessmann.vaadin15.typescript.backend.Employee;
+import com.viessmann.vaadin15.typescript.service.PushService;
+import com.viessmann.vaadin15.typescript.service.SubscriptionService;
 
 
 @Route(value = "Master-Detail")
@@ -31,6 +33,11 @@ public class MasterDetailView extends Div implements AfterNavigationObserver {
 
     @Autowired
     private BackendService service;
+    
+    @Autowired
+    private SubscriptionService subService;
+    @Autowired
+    private PushService pushService;
 
     private Grid<Employee> employees;
 
@@ -79,9 +86,17 @@ public class MasterDetailView extends Div implements AfterNavigationObserver {
         createEditorLayout(splitLayout);
 
         add(splitLayout);
+        
+        Button btnSendNotification = new Button("Notification without payload");
+        btnSendNotification.addClickListener(e -> sendWithoutPayload());
+        this.add(btnSendNotification);
     }
 
-    private void createEditorLayout(SplitLayout splitLayout) {
+    private void sendWithoutPayload() {
+    	subService.getAll().forEach(e -> pushService.sendPushMessage(e, null));
+	}
+
+	private void createEditorLayout(SplitLayout splitLayout) {
         Div editorDiv = new Div();
         editorDiv.setId("editor-layout");
         FormLayout formLayout = new FormLayout();

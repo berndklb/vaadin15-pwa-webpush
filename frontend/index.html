@@ -19,6 +19,8 @@
       <style include="lumo-color lumo-typography"></style>
     </custom-style>
     <!-- index.ts is included here automatically (either by the dev server or during the build) -->
+    <script>if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('/sw.js'); });}</script>
+    <script src="initServiceWorker.js"></script>
   </head>
 
   <body theme="light">
